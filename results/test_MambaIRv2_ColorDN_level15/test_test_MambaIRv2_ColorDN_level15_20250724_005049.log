@@ -1,0 +1,222 @@
+2025-07-24 00:50:49,133 INFO: 
+  name: test_MambaIRv2_ColorDN_level15
+  model_type: MambaIRv2Model
+  scale: 1
+  num_gpu: 1
+  manual_seed: 0
+  datasets:[
+    test_1:[
+      task: denoising_color
+      name: CBSD68
+      type: PairedImageDataset
+      dataroot_gt: datasets/ColorDN/CBSD68HQ
+      dataroot_lq: datasets/ColorDN/CBSD68HQ
+      filename_tmpl: {}
+      noise: 15
+      io_backend:[
+        type: disk
+      ]
+      phase: test
+      scale: 1
+    ]
+    test_2:[
+      task: denoising_color
+      name: Kodak24
+      type: PairedImageDataset
+      dataroot_gt: datasets/ColorDN/Kodak24HQ
+      dataroot_lq: datasets/ColorDN/Kodak24HQ
+      filename_tmpl: {}
+      noise: 15
+      io_backend:[
+        type: disk
+      ]
+      phase: test
+      scale: 1
+    ]
+    test_3:[
+      task: denoising_color
+      name: McMaster
+      type: PairedImageDataset
+      dataroot_gt: datasets/ColorDN/McMasterHQ
+      dataroot_lq: datasets/ColorDN/McMasterHQ
+      filename_tmpl: {}
+      noise: 15
+      io_backend:[
+        type: disk
+      ]
+      phase: test
+      scale: 1
+    ]
+    test_4:[
+      task: denoising_color
+      name: Urban100
+      type: PairedImageDataset
+      dataroot_gt: datasets/ColorDN/Urban100HQ
+      dataroot_lq: datasets/ColorDN/Urban100HQ
+      filename_tmpl: {}
+      noise: 15
+      io_backend:[
+        type: disk
+      ]
+      phase: test
+      scale: 1
+    ]
+  ]
+  network_g:[
+    type: MambaIRv2
+    upscale: 1
+    in_chans: 3
+    img_size: 128
+    img_range: 1.0
+    embed_dim: 174
+    d_state: 16
+    depths: [6, 6, 6, 6, 6, 6]
+    num_heads: [6, 6, 6, 6, 6, 6]
+    window_size: 16
+    inner_rank: 64
+    num_tokens: 128
+    convffn_kernel_size: 5
+    mlp_ratio: 2.0
+  ]
+  path:[
+    pretrain_network_g: pretrained/mambairv2_ColorDN_15.pth
+    strict_load_g: True
+    results_root: /data/lgl/codes/MambaIR/results/test_MambaIRv2_ColorDN_level15
+    log: /data/lgl/codes/MambaIR/results/test_MambaIRv2_ColorDN_level15
+    visualization: /data/lgl/codes/MambaIR/results/test_MambaIRv2_ColorDN_level15/visualization
+  ]
+  val:[
+    save_img: False
+    suffix: None
+    selfensemble_testing: False
+    patchwise_testing: False
+    metrics:[
+      psnr:[
+        type: calculate_psnr
+        crop_border: 0
+        test_y_channel: False
+      ]
+      ssim:[
+        type: calculate_ssim
+        crop_border: 0
+        test_y_channel: False
+      ]
+    ]
+  ]
+  dist: False
+  rank: 0
+  world_size: 1
+  auto_resume: False
+  is_train: False
+
+2025-07-24 00:50:49,135 INFO: Dataset [PairedImageDataset] - CBSD68 is built.
+2025-07-24 00:50:49,135 INFO: Number of test images in CBSD68: 68
+2025-07-24 00:50:49,136 INFO: Dataset [PairedImageDataset] - Kodak24 is built.
+2025-07-24 00:50:49,136 INFO: Number of test images in Kodak24: 24
+2025-07-24 00:50:49,137 INFO: Dataset [PairedImageDataset] - McMaster is built.
+2025-07-24 00:50:49,137 INFO: Number of test images in McMaster: 18
+2025-07-24 00:50:49,140 INFO: Dataset [PairedImageDataset] - Urban100 is built.
+2025-07-24 00:50:49,140 INFO: Number of test images in Urban100: 100
+2025-07-24 00:50:50,120 INFO: Network [MambaIRv2] is created.
+2025-07-24 00:50:50,658 INFO: Network: MambaIRv2, with parameters: 22,657,971
+2025-07-24 00:50:50,658 INFO: MambaIRv2(
+  (conv_first): Conv2d(3, 174, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  (patch_embed): PatchEmbed(
+    (norm): LayerNorm((174,), eps=1e-05, elementwise_affine=True)
+  )
+  (patch_unembed): PatchUnEmbed()
+  (layers): ModuleList(
+    (0-5): 6 x ASSB(
+      (patch_embed): PatchEmbed()
+      (patch_unembed): PatchUnEmbed()
+      (residual_group): BasicBlock(
+        dim=174, input_resolution=(128, 128), depth=6
+        (layers): ModuleList(
+          (0-5): 6 x AttentiveLayer(
+            (softmax): Softmax(dim=-1)
+            (lrelu): LeakyReLU(negative_slope=0.01)
+            (sigmoid): Sigmoid()
+            (norm1): LayerNorm((174,), eps=1e-05, elementwise_affine=True)
+            (norm2): LayerNorm((174,), eps=1e-05, elementwise_affine=True)
+            (norm3): LayerNorm((174,), eps=1e-05, elementwise_affine=True)
+            (norm4): LayerNorm((174,), eps=1e-05, elementwise_affine=True)
+            (wqkv): Linear(in_features=174, out_features=522, bias=True)
+            (win_mhsa): WindowAttention(
+              dim=174, window_size=(16, 16), num_heads=6, qkv_bias=True
+              (proj): Linear(in_features=174, out_features=174, bias=True)
+              (softmax): Softmax(dim=-1)
+            )
+            (assm): ASSM(
+              (selectiveScan): Selective_Scan()
+              (out_norm): LayerNorm((348,), eps=1e-05, elementwise_affine=True)
+              (act): SiLU()
+              (out_proj): Linear(in_features=348, out_features=174, bias=True)
+              (in_proj): Sequential(
+                (0): Conv2d(174, 348, kernel_size=(1, 1), stride=(1, 1))
+              )
+              (CPE): Sequential(
+                (0): Conv2d(348, 348, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=348)
+              )
+              (embeddingB): Embedding(128, 64)
+              (route): Sequential(
+                (0): Linear(in_features=174, out_features=58, bias=True)
+                (1): GELU(approximate='none')
+                (2): Linear(in_features=58, out_features=128, bias=True)
+                (3): LogSoftmax(dim=-1)
+              )
+            )
+            (convffn1): ConvFFN(
+              (fc1): Linear(in_features=174, out_features=348, bias=True)
+              (act): GELU(approximate='none')
+              (dwconv): dwconv(
+                (depthwise_conv): Sequential(
+                  (0): Conv2d(348, 348, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2), groups=348)
+                  (1): GELU(approximate='none')
+                )
+              )
+              (fc2): Linear(in_features=348, out_features=174, bias=True)
+            )
+            (convffn2): ConvFFN(
+              (fc1): Linear(in_features=174, out_features=348, bias=True)
+              (act): GELU(approximate='none')
+              (dwconv): dwconv(
+                (depthwise_conv): Sequential(
+                  (0): Conv2d(348, 348, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2), groups=348)
+                  (1): GELU(approximate='none')
+                )
+              )
+              (fc2): Linear(in_features=348, out_features=174, bias=True)
+            )
+            (embeddingA): Embedding(64, 16)
+          )
+        )
+      )
+      (conv): Conv2d(174, 174, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    )
+  )
+  (norm): LayerNorm((174,), eps=1e-05, elementwise_affine=True)
+  (conv_after_body): Conv2d(174, 174, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  (conv_last): Conv2d(174, 3, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+)
+2025-07-24 00:50:50,780 INFO: Loading MambaIRv2 model from pretrained/mambairv2_ColorDN_15.pth, with param key: [params].
+2025-07-24 00:50:51,006 INFO: Model [MambaIRv2Model] is created.
+2025-07-24 00:50:51,006 INFO: Testing CBSD68...
+2025-07-24 00:56:20,901 INFO: Validation CBSD68
+	 # psnr: 34.4691	Best: 34.4691 @ test_MambaIRv2_ColorDN_level15 iter
+	 # ssim: 0.9361	Best: 0.9361 @ test_MambaIRv2_ColorDN_level15 iter
+
+2025-07-24 00:56:20,902 INFO: Testing Kodak24...
+2025-07-24 00:59:20,912 INFO: Validation Kodak24
+	 # psnr: 35.4302	Best: 35.4302 @ test_MambaIRv2_ColorDN_level15 iter
+	 # ssim: 0.9310	Best: 0.9310 @ test_MambaIRv2_ColorDN_level15 iter
+
+2025-07-24 00:59:20,912 INFO: Testing McMaster...
+2025-07-24 01:01:35,990 INFO: Validation McMaster
+	 # psnr: 35.7345	Best: 35.7345 @ test_MambaIRv2_ColorDN_level15 iter
+	 # ssim: 0.9360	Best: 0.9360 @ test_MambaIRv2_ColorDN_level15 iter
+
+2025-07-24 01:01:35,991 INFO: Testing Urban100...
+2025-07-24 01:41:15,446 INFO: Validation Urban100
+	 # psnr: 35.4188	Best: 35.4188 @ test_MambaIRv2_ColorDN_level15 iter
+	 # ssim: 0.9538	Best: 0.9538 @ test_MambaIRv2_ColorDN_level15 iter
+

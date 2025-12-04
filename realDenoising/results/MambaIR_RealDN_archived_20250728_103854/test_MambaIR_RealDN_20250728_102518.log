@@ -1,0 +1,77 @@
+2025-07-28 10:25:18,485 INFO: 
+                ____                _       _____  ____
+               / __ ) ____ _ _____ (_)_____/ ___/ / __ \
+              / __  |/ __ `// ___// // ___/\__ \ / /_/ /
+             / /_/ // /_/ /(__  )/ // /__ ___/ // _, _/
+            /_____/ \__,_//____//_/ \___//____//_/ |_|
+     ______                   __   __                 __      __
+    / ____/____   ____   ____/ /  / /   __  __ _____ / /__   / /
+   / / __ / __ \ / __ \ / __  /  / /   / / / // ___// //_/  / /
+  / /_/ // /_/ // /_/ // /_/ /  / /___/ /_/ // /__ / /<    /_/
+  \____/ \____/ \____/ \____/  /_____/\____/ \___//_/|_|  (_)
+    
+Version Information: 
+	BasicSR: 1.2.0+2fb433e
+	PyTorch: 2.3.1+cu118
+	TorchVision: 0.18.1+cu118
+2025-07-28 10:25:18,485 INFO: 
+  name: MambaIR_RealDN
+  model_type: ImageCleanModel
+  scale: 1
+  num_gpu: 1
+  manual_seed: 100
+  datasets:[
+    test:[
+      name: testSet
+      type: Dataset_PairedImage
+      dataroot_gt: /data/lgl/datasets/LowLight/LOL-v1/eval15/high
+      dataroot_lq: /data/lgl/datasets/LowLight/LOL-v1/eval15/low
+      io_backend:[
+        type: disk
+      ]
+      phase: test
+      scale: 1
+    ]
+  ]
+  network_g:[
+    type: MambaIRUNet
+    inp_channels: 3
+    out_channels: 3
+    dim: 48
+    num_blocks: [4, 6, 6, 8]
+    num_refinement_blocks: 4
+    mlp_ratio: 1.5
+    bias: False
+    dual_pixel_task: False
+  ]
+  path:[
+    pretrain_network_g: /data/lgl/codes/MambaIR/realDenoising/experiments/MambaIR_RealDN/models/net_g_latest.pth
+    strict_load_g: False
+    root: /data/lgl/codes/MambaIR/realDenoising
+    results_root: /data/lgl/codes/MambaIR/realDenoising/results/MambaIR_RealDN
+    log: /data/lgl/codes/MambaIR/realDenoising/results/MambaIR_RealDN
+    visualization: /data/lgl/codes/MambaIR/realDenoising/results/MambaIR_RealDN/visualization
+  ]
+  val:[
+    save_img: False
+    suffix: None
+    metrics:[
+      psnr:[
+        type: calculate_psnr
+        crop_border: 3
+        test_y_channel: True
+      ]
+      ssim:[
+        type: calculate_ssim
+        crop_border: 3
+        test_y_channel: True
+      ]
+    ]
+  ]
+  is_train: False
+  dist: False
+  rank: 0
+  world_size: 1
+
+2025-07-28 10:25:18,486 INFO: Dataset Dataset_PairedImage - testSet is created.
+2025-07-28 10:25:18,486 INFO: Number of test images in testSet: 15

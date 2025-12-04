@@ -1,0 +1,114 @@
+2025-07-28 10:20:17,111 INFO: 
+                ____                _       _____  ____
+               / __ ) ____ _ _____ (_)_____/ ___/ / __ \
+              / __  |/ __ `// ___// // ___/\__ \ / /_/ /
+             / /_/ // /_/ /(__  )/ // /__ ___/ // _, _/
+            /_____/ \__,_//____//_/ \___//____//_/ |_|
+     ______                   __   __                 __      __
+    / ____/____   ____   ____/ /  / /   __  __ _____ / /__   / /
+   / / __ / __ \ / __ \ / __  /  / /   / / / // ___// //_/  / /
+  / /_/ // /_/ // /_/ // /_/ /  / /___/ /_/ // /__ / /<    /_/
+  \____/ \____/ \____/ \____/  /_____/\____/ \___//_/|_|  (_)
+    
+Version Information: 
+	BasicSR: 1.2.0+2fb433e
+	PyTorch: 2.3.1+cu118
+	TorchVision: 0.18.1+cu118
+2025-07-28 10:20:17,111 INFO: 
+  name: MambaIR_RealDN
+  model_type: ImageCleanModel
+  scale: 1
+  num_gpu: 8
+  manual_seed: 100
+  datasets:[
+    train:[
+      name: TrainSet
+      type: Dataset_PairedImage
+      dataroot_gt: /data/lgl/datasets/LowLight/LOL-v1/our485/high
+      dataroot_lq: /data/lgl/datasets/LowLight/LOL-v1/our485/low
+      geometric_augs: True
+      filename_tmpl: {}
+      io_backend:[
+        type: disk
+      ]
+      use_shuffle: True
+      num_worker_per_gpu: 0
+      batch_size_per_gpu: 1
+      mini_batch_sizes: [8, 5, 4, 2, 1, 1]
+      iters: [92000, 64000, 48000, 36000, 36000, 24000]
+      gt_size: 384
+      gt_sizes: [128, 160, 192, 256, 320, 320]
+      dataset_enlarge_ratio: 100
+      prefetch_mode: None
+      phase: train
+      scale: 1
+    ]
+    val:[
+      name: ValSet
+      type: Dataset_PairedImage
+      dataroot_gt: /data/lgl/datasets/LowLight/LOL-v1/eval15/high
+      dataroot_lq: /data/lgl/datasets/LowLight/LOL-v1/eval15/low
+      io_backend:[
+        type: disk
+      ]
+      phase: val
+      scale: 1
+    ]
+    test:[
+      name: testSet
+      type: Dataset_PairedImage
+      dataroot_gt: /data/lgl/datasets/LowLight/LOL-v1/eval15/high
+      dataroot_lq: /data/lgl/datasets/LowLight/LOL-v1/eval15/low
+      io_backend:[
+        type: disk
+      ]
+      phase: test
+      scale: 1
+    ]
+  ]
+  network_g:[
+    type: MambaIRUNet
+    inp_channels: 3
+    out_channels: 3
+    dim: 48
+    num_blocks: [4, 6, 6, 8]
+    num_refinement_blocks: 4
+    mlp_ratio: 1.5
+    bias: False
+    dual_pixel_task: False
+  ]
+  path:[
+    pretrain_network_g: /data/lgl/codes/MambaIR/realDenoising/experiments/MambaIR_RealDN/models/net_g_latest.pth
+    strict_load_g: False
+    root: /data/lgl/codes/MambaIR/realDenoising
+    results_root: /data/lgl/codes/MambaIR/realDenoising/results/MambaIR_RealDN
+    log: /data/lgl/codes/MambaIR/realDenoising/results/MambaIR_RealDN
+    visualization: /data/lgl/codes/MambaIR/realDenoising/results/MambaIR_RealDN/visualization
+  ]
+  val:[
+    save_img: False
+    suffix: None
+    metrics:[
+      psnr:[
+        type: calculate_psnr
+        crop_border: 3
+        test_y_channel: True
+      ]
+      ssim:[
+        type: calculate_ssim
+        crop_border: 3
+        test_y_channel: True
+      ]
+    ]
+  ]
+  is_train: False
+  dist: False
+  rank: 0
+  world_size: 1
+
+2025-07-28 10:20:17,112 INFO: Dataset Dataset_PairedImage - testSet is created.
+2025-07-28 10:20:17,112 INFO: Number of test images in testSet: 15
+2025-07-28 10:20:17,126 INFO: Dataset Dataset_PairedImage - TrainSet is created.
+2025-07-28 10:20:17,127 INFO: Number of test images in TrainSet: 485
+2025-07-28 10:20:17,127 INFO: Dataset Dataset_PairedImage - ValSet is created.
+2025-07-28 10:20:17,127 INFO: Number of test images in ValSet: 15

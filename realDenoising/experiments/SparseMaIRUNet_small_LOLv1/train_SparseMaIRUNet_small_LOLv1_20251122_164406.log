@@ -1,0 +1,481 @@
+2025-11-22 16:44:06,945 INFO: 
+                ____                _       _____  ____
+               / __ ) ____ _ _____ (_)_____/ ___/ / __ \
+              / __  |/ __ `// ___// // ___/\__ \ / /_/ /
+             / /_/ // /_/ /(__  )/ // /__ ___/ // _, _/
+            /_____/ \__,_//____//_/ \___//____//_/ |_|
+     ______                   __   __                 __      __
+    / ____/____   ____   ____/ /  / /   __  __ _____ / /__   / /
+   / / __ / __ \ / __ \ / __  /  / /   / / / // ___// //_/  / /
+  / /_/ // /_/ // /_/ // /_/ /  / /___/ /_/ // /__ / /<    /_/
+  \____/ \____/ \____/ \____/  /_____/\____/ \___//_/|_|  (_)
+    
+Version Information: 
+	BasicSR: 1.2.0+863ca48
+	PyTorch: 2.3.1+cu121
+	TorchVision: 0.18.1+cu121
+2025-11-22 16:44:06,946 INFO: 
+  name: SparseMaIRUNet_small_LOLv1
+  model_type: ImageCleanModel
+  scale: 1
+  num_gpu: 4
+  manual_seed: 100
+  datasets:[
+    train:[
+      name: TrainSet
+      type: Dataset_PairedImage
+      dataroot_gt: /data/lgl/datasets/LowLight/LOL-v1/our485/high
+      dataroot_lq: /data/lgl/datasets/LowLight/LOL-v1/our485/low
+      geometric_augs: True
+      filename_tmpl: {}
+      io_backend:[
+        type: disk
+      ]
+      use_shuffle: True
+      num_worker_per_gpu: 0
+      batch_size_per_gpu: 1
+      mini_batch_sizes: [8, 5, 4, 2, 1, 1]
+      iters: [92000, 64000, 48000, 36000, 36000, 24000]
+      gt_size: 384
+      gt_sizes: [128, 160, 192, 256, 320, 320]
+      dataset_enlarge_ratio: 100
+      prefetch_mode: None
+      phase: train
+      scale: 1
+    ]
+    val:[
+      name: ValSet
+      type: Dataset_PairedImage
+      dataroot_gt: /data/lgl/datasets/LowLight/LOL-v1/eval15/high
+      dataroot_lq: /data/lgl/datasets/LowLight/LOL-v1/eval15/low
+      io_backend:[
+        type: disk
+      ]
+      phase: val
+      scale: 1
+    ]
+  ]
+  network_g:[
+    type: SparseMaIRUNet
+    img_size: 128
+    patch_size: 1
+    ssm_ratio: 2.0
+    scan_len: 4
+    inp_channels: 3
+    out_channels: 3
+    dim: 48
+    num_blocks: [2, 4, 4, 8]
+    num_refinement_blocks: 2
+    mlp_ratio: 1.5
+    bias: False
+    dual_pixel_task: False
+  ]
+  path:[
+    pretrain_network_g: None
+    strict_load_g: True
+    resume_state: experiments/SparseMaIRUNet_small_LOLv1/training_states/76000.state
+    root: /data/lgl/codes/MambaIR/realDenoising
+    experiments_root: /data/lgl/codes/MambaIR/realDenoising/experiments/SparseMaIRUNet_small_LOLv1
+    models: /data/lgl/codes/MambaIR/realDenoising/experiments/SparseMaIRUNet_small_LOLv1/models
+    training_states: /data/lgl/codes/MambaIR/realDenoising/experiments/SparseMaIRUNet_small_LOLv1/training_states
+    log: /data/lgl/codes/MambaIR/realDenoising/experiments/SparseMaIRUNet_small_LOLv1
+    visualization: /data/lgl/codes/MambaIR/realDenoising/experiments/SparseMaIRUNet_small_LOLv1/visualization
+  ]
+  train:[
+    total_iter: 150000
+    warmup_iter: -1
+    use_grad_clip: True
+    scheduler:[
+      type: CosineAnnealingRestartCyclicLR
+      periods: [46000, 104000]
+      restart_weights: [1, 1]
+      eta_mins: [0.0003, 1e-06]
+    ]
+    mixing_augs:[
+      mixup: True
+      mixup_beta: 1.2
+      use_identity: True
+    ]
+    optim_g:[
+      type: AdamW
+      lr: 0.0003
+      weight_decay: 0.0001
+      betas: [0.9, 0.999]
+    ]
+    pixel_opt:[
+      type: L1Loss
+      loss_weight: 1
+      reduction: mean
+    ]
+  ]
+  val:[
+    window_size: 8
+    val_freq: 4000.0
+    save_img: False
+    rgb2bgr: True
+    use_image: False
+    max_minibatch: 8
+    metrics:[
+      psnr:[
+        type: calculate_psnr
+        crop_border: 0
+        test_y_channel: False
+      ]
+    ]
+  ]
+  logger:[
+    print_freq: 1000
+    save_checkpoint_freq: 4000.0
+    use_tb_logger: True
+    wandb:[
+      project: None
+      resume_id: None
+    ]
+  ]
+  dist_params:[
+    backend: nccl
+    port: 29500
+  ]
+  is_train: True
+  dist: True
+  rank: 0
+  world_size: 4
+
+2025-11-22 16:44:07,360 INFO: Dataset Dataset_PairedImage - TrainSet is created.
+2025-11-22 16:44:07,360 INFO: Training statistics:
+	Number of train images: 485
+	Dataset enlarge ratio: 100
+	Batch size per gpu: 1
+	World size (gpu number): 4
+	Require iter number per epoch: 12125
+	Total epochs: 13; iters: 150000.
+2025-11-22 16:44:07,361 INFO: Dataset Dataset_PairedImage - ValSet is created.
+2025-11-22 16:44:07,362 INFO: Number of val images/folders in ValSet: 15
+2025-11-22 16:44:07,362 INFO: Set pretrain_network_g to /data/lgl/codes/MambaIR/realDenoising/experiments/SparseMaIRUNet_small_LOLv1/models/net_g_76000.pth
+2025-11-22 16:44:09,043 INFO: Network: DistributedDataParallel - SparseMaIRUNet, with parameters: 31,996,848
+2025-11-22 16:44:09,043 INFO: SparseMaIRUNet(
+  (conv_first): Conv2d(3, 48, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  (patch_embed): PatchEmbed(
+    (norm): LayerNorm((48,), eps=1e-05, elementwise_affine=True)
+  )
+  (encoder_level1): ModuleList(
+    (0-1): 2 x RMB(
+      (ln_1): LayerNorm((48,), eps=1e-05, elementwise_affine=True)
+      (self_attention): VMM(
+        (in_proj): Linear(in_features=48, out_features=192, bias=False)
+        (conv2d): Conv2d(96, 96, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=96)
+        (act): SiLU()
+        (x_proj): Linear(in_features=96, out_features=35, bias=False)
+        (dt_proj): Linear(in_features=3, out_features=96, bias=True)
+        (out_norm): LayerNorm((96,), eps=1e-05, elementwise_affine=True)
+        (out_proj): Linear(in_features=96, out_features=48, bias=False)
+        (relu): ReLU()
+        (att_ca): Conv2d(96, 192, kernel_size=(1, 1), stride=(1, 1), bias=False)
+      )
+      (drop_path): DropPath()
+      (conv_blk): MlpFromMaIR(
+        (fc1): Linear(in_features=48, out_features=72, bias=True)
+        (act): GELU(approximate='none')
+        (fc2): Linear(in_features=72, out_features=48, bias=True)
+      )
+      (ln_2): LayerNorm((48,), eps=1e-05, elementwise_affine=True)
+    )
+  )
+  (down1_2): Downsample(
+    (body): Sequential(
+      (0): Conv2d(48, 24, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): PixelUnshuffle(downscale_factor=2)
+    )
+  )
+  (encoder_level2): ModuleList(
+    (0-3): 4 x RMB(
+      (ln_1): LayerNorm((96,), eps=1e-05, elementwise_affine=True)
+      (self_attention): VMM(
+        (in_proj): Linear(in_features=96, out_features=384, bias=False)
+        (conv2d): Conv2d(192, 192, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=192)
+        (act): SiLU()
+        (x_proj): Linear(in_features=192, out_features=38, bias=False)
+        (dt_proj): Linear(in_features=6, out_features=192, bias=True)
+        (out_norm): LayerNorm((192,), eps=1e-05, elementwise_affine=True)
+        (out_proj): Linear(in_features=192, out_features=96, bias=False)
+        (relu): ReLU()
+        (att_ca): Conv2d(192, 384, kernel_size=(1, 1), stride=(1, 1), bias=False)
+      )
+      (drop_path): DropPath()
+      (conv_blk): MlpFromMaIR(
+        (fc1): Linear(in_features=96, out_features=144, bias=True)
+        (act): GELU(approximate='none')
+        (fc2): Linear(in_features=144, out_features=96, bias=True)
+      )
+      (ln_2): LayerNorm((96,), eps=1e-05, elementwise_affine=True)
+    )
+  )
+  (down2_3): Downsample(
+    (body): Sequential(
+      (0): Conv2d(96, 48, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): PixelUnshuffle(downscale_factor=2)
+    )
+  )
+  (encoder_level3): ModuleList(
+    (0-3): 4 x RMB(
+      (ln_1): LayerNorm((192,), eps=1e-05, elementwise_affine=True)
+      (self_attention): VMM(
+        (in_proj): Linear(in_features=192, out_features=768, bias=False)
+        (conv2d): Conv2d(384, 384, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=384)
+        (act): SiLU()
+        (x_proj): Linear(in_features=384, out_features=44, bias=False)
+        (dt_proj): Linear(in_features=12, out_features=384, bias=True)
+        (out_norm): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+        (out_proj): Linear(in_features=384, out_features=192, bias=False)
+        (relu): ReLU()
+        (att_ca): Conv2d(384, 768, kernel_size=(1, 1), stride=(1, 1), bias=False)
+      )
+      (drop_path): DropPath()
+      (conv_blk): MlpFromMaIR(
+        (fc1): Linear(in_features=192, out_features=288, bias=True)
+        (act): GELU(approximate='none')
+        (fc2): Linear(in_features=288, out_features=192, bias=True)
+      )
+      (ln_2): LayerNorm((192,), eps=1e-05, elementwise_affine=True)
+    )
+  )
+  (down3_4): Downsample(
+    (body): Sequential(
+      (0): Conv2d(192, 96, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): PixelUnshuffle(downscale_factor=2)
+    )
+  )
+  (latent): ModuleList(
+    (0-7): 8 x RMB(
+      (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+      (self_attention): VMM(
+        (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+        (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+        (act): SiLU()
+        (x_proj): Linear(in_features=768, out_features=56, bias=False)
+        (dt_proj): Linear(in_features=24, out_features=768, bias=True)
+        (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+        (out_proj): Linear(in_features=768, out_features=384, bias=False)
+        (relu): ReLU()
+        (att_ca): Conv2d(768, 1536, kernel_size=(1, 1), stride=(1, 1), bias=False)
+      )
+      (drop_path): DropPath()
+      (conv_blk): MlpFromMaIR(
+        (fc1): Linear(in_features=384, out_features=576, bias=True)
+        (act): GELU(approximate='none')
+        (fc2): Linear(in_features=576, out_features=384, bias=True)
+      )
+      (ln_2): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+    )
+  )
+  (up4_3): Upsample(
+    (body): Sequential(
+      (0): Conv2d(384, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): PixelShuffle(upscale_factor=2)
+    )
+  )
+  (reduce_chan_level3): Conv2d(384, 192, kernel_size=(1, 1), stride=(1, 1), bias=False)
+  (decoder_level3): ModuleList(
+    (0-3): 4 x RMB(
+      (ln_1): LayerNorm((192,), eps=1e-05, elementwise_affine=True)
+      (self_attention): VMM(
+        (in_proj): Linear(in_features=192, out_features=768, bias=False)
+        (conv2d): Conv2d(384, 384, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=384)
+        (act): SiLU()
+        (x_proj): Linear(in_features=384, out_features=44, bias=False)
+        (dt_proj): Linear(in_features=12, out_features=384, bias=True)
+        (out_norm): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+        (out_proj): Linear(in_features=384, out_features=192, bias=False)
+        (relu): ReLU()
+        (att_ca): Conv2d(384, 768, kernel_size=(1, 1), stride=(1, 1), bias=False)
+      )
+      (drop_path): DropPath()
+      (conv_blk): MlpFromMaIR(
+        (fc1): Linear(in_features=192, out_features=288, bias=True)
+        (act): GELU(approximate='none')
+        (fc2): Linear(in_features=288, out_features=192, bias=True)
+      )
+      (ln_2): LayerNorm((192,), eps=1e-05, elementwise_affine=True)
+    )
+  )
+  (up3_2): Upsample(
+    (body): Sequential(
+      (0): Conv2d(192, 384, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): PixelShuffle(upscale_factor=2)
+    )
+  )
+  (reduce_chan_level2): Conv2d(192, 96, kernel_size=(1, 1), stride=(1, 1), bias=False)
+  (decoder_level2): ModuleList(
+    (0-3): 4 x RMB(
+      (ln_1): LayerNorm((96,), eps=1e-05, elementwise_affine=True)
+      (self_attention): VMM(
+        (in_proj): Linear(in_features=96, out_features=384, bias=False)
+        (conv2d): Conv2d(192, 192, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=192)
+        (act): SiLU()
+        (x_proj): Linear(in_features=192, out_features=38, bias=False)
+        (dt_proj): Linear(in_features=6, out_features=192, bias=True)
+        (out_norm): LayerNorm((192,), eps=1e-05, elementwise_affine=True)
+        (out_proj): Linear(in_features=192, out_features=96, bias=False)
+        (relu): ReLU()
+        (att_ca): Conv2d(192, 384, kernel_size=(1, 1), stride=(1, 1), bias=False)
+      )
+      (drop_path): DropPath()
+      (conv_blk): MlpFromMaIR(
+        (fc1): Linear(in_features=96, out_features=144, bias=True)
+        (act): GELU(approximate='none')
+        (fc2): Linear(in_features=144, out_features=96, bias=True)
+      )
+      (ln_2): LayerNorm((96,), eps=1e-05, elementwise_affine=True)
+    )
+  )
+  (up2_1): Upsample(
+    (body): Sequential(
+      (0): Conv2d(96, 192, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): PixelShuffle(upscale_factor=2)
+    )
+  )
+  (decoder_level1): ModuleList(
+    (0-1): 2 x RMB(
+      (ln_1): LayerNorm((96,), eps=1e-05, elementwise_affine=True)
+      (self_attention): VMM(
+        (in_proj): Linear(in_features=96, out_features=384, bias=False)
+        (conv2d): Conv2d(192, 192, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=192)
+        (act): SiLU()
+        (x_proj): Linear(in_features=192, out_features=38, bias=False)
+        (dt_proj): Linear(in_features=6, out_features=192, bias=True)
+        (out_norm): LayerNorm((192,), eps=1e-05, elementwise_affine=True)
+        (out_proj): Linear(in_features=192, out_features=96, bias=False)
+        (relu): ReLU()
+        (att_ca): Conv2d(192, 384, kernel_size=(1, 1), stride=(1, 1), bias=False)
+      )
+      (drop_path): DropPath()
+      (conv_blk): MlpFromMaIR(
+        (fc1): Linear(in_features=96, out_features=144, bias=True)
+        (act): GELU(approximate='none')
+        (fc2): Linear(in_features=144, out_features=96, bias=True)
+      )
+      (ln_2): LayerNorm((96,), eps=1e-05, elementwise_affine=True)
+    )
+  )
+  (refinement): ModuleList(
+    (0-1): 2 x RMB(
+      (ln_1): LayerNorm((96,), eps=1e-05, elementwise_affine=True)
+      (self_attention): VMM(
+        (in_proj): Linear(in_features=96, out_features=384, bias=False)
+        (conv2d): Conv2d(192, 192, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=192)
+        (act): SiLU()
+        (x_proj): Linear(in_features=192, out_features=38, bias=False)
+        (dt_proj): Linear(in_features=6, out_features=192, bias=True)
+        (out_norm): LayerNorm((192,), eps=1e-05, elementwise_affine=True)
+        (out_proj): Linear(in_features=192, out_features=96, bias=False)
+        (relu): ReLU()
+        (att_ca): Conv2d(192, 384, kernel_size=(1, 1), stride=(1, 1), bias=False)
+      )
+      (drop_path): DropPath()
+      (conv_blk): MlpFromMaIR(
+        (fc1): Linear(in_features=96, out_features=144, bias=True)
+        (act): GELU(approximate='none')
+        (fc2): Linear(in_features=144, out_features=96, bias=True)
+      )
+      (ln_2): LayerNorm((96,), eps=1e-05, elementwise_affine=True)
+    )
+  )
+  (output): Conv2d(96, 3, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+)
+2025-11-22 16:44:09,044 INFO: Loading SparseMaIRUNet model from /data/lgl/codes/MambaIR/realDenoising/experiments/SparseMaIRUNet_small_LOLv1/models/net_g_76000.pth.
+2025-11-22 16:44:09,443 INFO: Model [ImageCleanModel] is created.
+2025-11-22 16:44:09,464 INFO: Resuming training from epoch: 6, iter: 76000.
+2025-11-22 16:44:09,465 INFO: Start training from epoch: 6, iter: 76000
+2025-11-22 16:44:09,521 INFO: 
+ Updating Patch_Size to 128 and Batch_Size to 32 
+
+2025-11-22 17:00:36,998 INFO: [Spars..][epoch:  6, iter:  77,000, lr:(2.391e-04,)] [eta: 20:00:16, time (data): 1.287 (0.035)] l_pix: nan 
+2025-11-22 17:17:58,009 INFO: [Spars..][epoch:  6, iter:  78,000, lr:(2.354e-04,)] [eta: 20:16:30, time (data): 0.924 (0.039)] l_pix: nan 
+2025-11-22 17:35:07,523 INFO: [Spars..][epoch:  6, iter:  79,000, lr:(2.317e-04,)] [eta: 20:05:48, time (data): 0.887 (0.031)] l_pix: nan 
+2025-11-22 17:52:23,736 INFO: [Spars..][epoch:  6, iter:  80,000, lr:(2.278e-04,)] [eta: 19:53:50, time (data): 0.970 (0.027)] l_pix: nan 
+2025-11-22 17:52:23,737 INFO: Saving models and training states.
+2025-11-22 17:54:12,686 INFO: Validation ValSet,		 # psnr: nan
+2025-11-22 18:11:57,846 INFO: [Spars..][epoch:  6, iter:  81,000, lr:(2.239e-04,)] [eta: 20:11:28, time (data): 1.271 (0.030)] l_pix: nan 
+2025-11-22 18:31:06,905 INFO: [Spars..][epoch:  6, iter:  82,000, lr:(2.200e-04,)] [eta: 20:11:57, time (data): 1.280 (0.039)] l_pix: nan 
+2025-11-22 18:50:48,666 INFO: [Spars..][epoch:  6, iter:  83,000, lr:(2.160e-04,)] [eta: 20:12:03, time (data): 0.911 (0.031)] l_pix: nan 
+2025-11-22 19:09:21,283 INFO: [Spars..][epoch:  6, iter:  84,000, lr:(2.119e-04,)] [eta: 19:57:42, time (data): 1.273 (0.038)] l_pix: nan 
+2025-11-22 19:09:21,284 INFO: Saving models and training states.
+2025-11-22 19:11:09,554 INFO: Validation ValSet,		 # psnr: nan
+2025-11-22 19:30:44,383 INFO: [Spars..][epoch:  6, iter:  85,000, lr:(2.077e-04,)] [eta: 20:02:56, time (data): 1.278 (0.035)] l_pix: nan 
+2025-11-22 19:49:38,069 INFO: [Spars..][epoch:  6, iter:  86,000, lr:(2.035e-04,)] [eta: 19:46:54, time (data): 1.282 (0.038)] l_pix: nan 
+2025-11-22 20:08:55,570 INFO: [Spars..][epoch:  6, iter:  87,000, lr:(1.993e-04,)] [eta: 19:32:38, time (data): 1.268 (0.026)] l_pix: nan 
+2025-11-22 20:27:01,641 INFO: [Spars..][epoch:  6, iter:  88,000, lr:(1.950e-04,)] [eta: 19:11:22, time (data): 0.922 (0.039)] l_pix: nan 
+2025-11-22 20:27:01,643 INFO: Saving models and training states.
+2025-11-22 20:28:50,186 INFO: Validation ValSet,		 # psnr: nan
+2025-11-22 20:47:05,887 INFO: [Spars..][epoch:  7, iter:  89,000, lr:(1.906e-04,)] [eta: 18:59:50, time (data): 1.277 (0.038)] l_pix: nan 
+2025-11-22 21:05:45,868 INFO: [Spars..][epoch:  7, iter:  90,000, lr:(1.863e-04,)] [eta: 18:41:04, time (data): 1.264 (0.024)] l_pix: nan 
+2025-11-22 21:24:03,154 INFO: [Spars..][epoch:  7, iter:  91,000, lr:(1.819e-04,)] [eta: 18:20:49, time (data): 1.287 (0.032)] l_pix: nan 
+2025-11-22 21:42:02,936 INFO: [Spars..][epoch:  7, iter:  92,000, lr:(1.775e-04,)] [eta: 17:59:46, time (data): 0.954 (0.037)] l_pix: nan 
+2025-11-22 21:42:02,937 INFO: Saving models and training states.
+2025-11-22 21:43:51,259 INFO: Validation ValSet,		 # psnr: nan
+2025-11-22 21:43:51,293 INFO: 
+ Updating Patch_Size to 160 and Batch_Size to 20 
+
+2025-11-22 22:07:40,032 INFO: [Spars..][epoch:  7, iter:  93,000, lr:(1.730e-04,)] [eta: 18:04:37, time (data): 1.276 (0.029)] l_pix: nan 
+2025-11-22 22:31:53,046 INFO: [Spars..][epoch:  7, iter:  94,000, lr:(1.685e-04,)] [eta: 18:01:44, time (data): 1.247 (0.040)] l_pix: nan 
+2025-11-22 22:56:41,712 INFO: [Spars..][epoch:  7, iter:  95,000, lr:(1.640e-04,)] [eta: 17:58:19, time (data): 1.240 (0.039)] l_pix: nan 
+2025-11-22 23:18:20,693 INFO: [Spars..][epoch:  7, iter:  96,000, lr:(1.595e-04,)] [eta: 17:44:13, time (data): 1.280 (0.030)] l_pix: nan 
+2025-11-22 23:18:20,695 INFO: Saving models and training states.
+2025-11-22 23:20:09,179 INFO: Validation ValSet,		 # psnr: nan
+2025-11-22 23:44:33,899 INFO: [Spars..][epoch:  7, iter:  97,000, lr:(1.550e-04,)] [eta: 17:40:57, time (data): 1.763 (0.027)] l_pix: nan 
+2025-11-23 00:07:31,822 INFO: [Spars..][epoch:  7, iter:  98,000, lr:(1.505e-04,)] [eta: 17:27:54, time (data): 1.235 (0.031)] l_pix: nan 
+2025-11-23 00:31:27,423 INFO: [Spars..][epoch:  7, iter:  99,000, lr:(1.460e-04,)] [eta: 17:16:07, time (data): 1.783 (0.040)] l_pix: nan 
+2025-11-23 00:54:09,841 INFO: [Spars..][epoch:  7, iter: 100,000, lr:(1.415e-04,)] [eta: 17:00:47, time (data): 1.239 (0.038)] l_pix: nan 
+2025-11-23 00:54:09,842 INFO: Saving models and training states.
+2025-11-23 00:55:58,659 INFO: Validation ValSet,		 # psnr: nan
+2025-11-23 01:18:53,475 INFO: [Spars..][epoch:  8, iter: 101,000, lr:(1.370e-04,)] [eta: 16:48:49, time (data): 1.775 (0.039)] l_pix: nan 
+2025-11-23 01:46:12,243 INFO: [Spars..][epoch:  8, iter: 102,000, lr:(1.325e-04,)] [eta: 16:40:38, time (data): 1.219 (0.025)] l_pix: nan 
+2025-11-23 02:10:45,947 INFO: [Spars..][epoch:  8, iter: 103,000, lr:(1.280e-04,)] [eta: 16:26:15, time (data): 1.771 (0.040)] l_pix: nan 
+2025-11-23 02:34:15,272 INFO: [Spars..][epoch:  8, iter: 104,000, lr:(1.236e-04,)] [eta: 16:09:23, time (data): 1.769 (0.029)] l_pix: nan 
+2025-11-23 02:34:15,273 INFO: Saving models and training states.
+2025-11-23 02:36:04,077 INFO: Validation ValSet,		 # psnr: nan
+2025-11-23 03:02:02,945 INFO: [Spars..][epoch:  8, iter: 105,000, lr:(1.191e-04,)] [eta: 15:58:44, time (data): 1.771 (0.040)] l_pix: nan 
+2025-11-23 03:28:42,180 INFO: [Spars..][epoch:  8, iter: 106,000, lr:(1.147e-04,)] [eta: 15:45:16, time (data): 1.244 (0.039)] l_pix: nan 
+2025-11-23 03:54:09,122 INFO: [Spars..][epoch:  8, iter: 107,000, lr:(1.104e-04,)] [eta: 15:29:17, time (data): 1.278 (0.030)] l_pix: nan 
+2025-11-23 04:21:00,718 INFO: [Spars..][epoch:  8, iter: 108,000, lr:(1.060e-04,)] [eta: 15:14:34, time (data): 1.784 (0.038)] l_pix: nan 
+2025-11-23 04:21:00,719 INFO: Saving models and training states.
+2025-11-23 04:22:49,091 INFO: Validation ValSet,		 # psnr: nan
+2025-11-23 04:48:07,097 INFO: [Spars..][epoch:  8, iter: 109,000, lr:(1.017e-04,)] [eta: 14:59:25, time (data): 1.249 (0.038)] l_pix: nan 
+2025-11-23 05:11:22,847 INFO: [Spars..][epoch:  8, iter: 110,000, lr:(9.749e-05,)] [eta: 14:39:02, time (data): 1.556 (0.039)] l_pix: nan 
+2025-11-23 05:38:26,869 INFO: [Spars..][epoch:  8, iter: 111,000, lr:(9.329e-05,)] [eta: 14:22:44, time (data): 1.776 (0.039)] l_pix: nan 
+2025-11-23 06:05:56,874 INFO: [Spars..][epoch:  8, iter: 112,000, lr:(8.915e-05,)] [eta: 14:06:17, time (data): 1.250 (0.040)] l_pix: nan 
+2025-11-23 06:05:56,875 INFO: Saving models and training states.
+2025-11-23 06:07:45,291 INFO: Validation ValSet,		 # psnr: nan
+2025-11-23 06:30:42,253 INFO: [Spars..][epoch:  9, iter: 113,000, lr:(8.506e-05,)] [eta: 13:46:30, time (data): 1.775 (0.038)] l_pix: nan 
+2025-11-23 06:55:35,373 INFO: [Spars..][epoch:  9, iter: 114,000, lr:(8.103e-05,)] [eta: 13:26:34, time (data): 1.763 (0.024)] l_pix: nan 
+2025-11-23 07:19:55,595 INFO: [Spars..][epoch:  9, iter: 115,000, lr:(7.706e-05,)] [eta: 13:05:54, time (data): 1.226 (0.030)] l_pix: nan 
+2025-11-23 07:46:14,944 INFO: [Spars..][epoch:  9, iter: 116,000, lr:(7.316e-05,)] [eta: 12:46:44, time (data): 1.762 (0.040)] l_pix: nan 
+2025-11-23 07:46:14,946 INFO: Saving models and training states.
+2025-11-23 07:48:08,018 INFO: Validation ValSet,		 # psnr: nan
+2025-11-23 08:11:54,015 INFO: [Spars..][epoch:  9, iter: 117,000, lr:(6.933e-05,)] [eta: 12:26:40, time (data): 1.237 (0.039)] l_pix: nan 
+2025-11-23 08:36:51,635 INFO: [Spars..][epoch:  9, iter: 118,000, lr:(6.558e-05,)] [eta: 12:05:49, time (data): 1.246 (0.040)] l_pix: nan 
+2025-11-23 09:01:01,777 INFO: [Spars..][epoch:  9, iter: 119,000, lr:(6.190e-05,)] [eta: 11:44:13, time (data): 1.300 (0.040)] l_pix: nan 
+2025-11-23 09:22:20,830 INFO: [Spars..][epoch:  9, iter: 120,000, lr:(5.830e-05,)] [eta: 11:20:32, time (data): 1.242 (0.031)] l_pix: nan 
+2025-11-23 09:22:20,831 INFO: Saving models and training states.
+2025-11-23 09:24:09,407 INFO: Validation ValSet,		 # psnr: nan
+2025-11-23 09:48:43,671 INFO: [Spars..][epoch:  9, iter: 121,000, lr:(5.479e-05,)] [eta: 11:00:14, time (data): 1.231 (0.030)] l_pix: nan 
+2025-11-23 10:11:34,828 INFO: [Spars..][epoch:  9, iter: 122,000, lr:(5.137e-05,)] [eta: 10:37:31, time (data): 1.770 (0.040)] l_pix: nan 
+2025-11-23 10:36:31,851 INFO: [Spars..][epoch:  9, iter: 123,000, lr:(4.803e-05,)] [eta: 10:16:00, time (data): 1.285 (0.025)] l_pix: nan 
+2025-11-23 10:59:45,313 INFO: [Spars..][epoch:  9, iter: 124,000, lr:(4.479e-05,)] [eta: 9:53:24, time (data): 1.766 (0.038)] l_pix: nan 
+2025-11-23 10:59:45,314 INFO: Saving models and training states.
+2025-11-23 11:02:47,513 INFO: Validation ValSet,		 # psnr: nan
+2025-11-23 11:28:58,413 INFO: [Spars..][epoch: 10, iter: 125,000, lr:(4.165e-05,)] [eta: 9:33:51, time (data): 1.778 (0.039)] l_pix: nan 
+2025-11-23 11:55:44,241 INFO: [Spars..][epoch: 10, iter: 126,000, lr:(3.860e-05,)] [eta: 9:12:43, time (data): 1.245 (0.040)] l_pix: nan 
+2025-11-23 12:18:24,573 INFO: [Spars..][epoch: 10, iter: 127,000, lr:(3.566e-05,)] [eta: 8:49:31, time (data): 1.762 (0.027)] l_pix: nan 
+2025-11-23 12:45:47,156 INFO: [Spars..][epoch: 10, iter: 128,000, lr:(3.282e-05,)] [eta: 8:28:20, time (data): 1.224 (0.024)] l_pix: nan 
+2025-11-23 12:45:47,157 INFO: Saving models and training states.
+2025-11-23 12:47:35,438 INFO: Validation ValSet,		 # psnr: nan
+2025-11-23 13:10:31,196 INFO: [Spars..][epoch: 10, iter: 129,000, lr:(3.009e-05,)] [eta: 8:05:53, time (data): 1.242 (0.036)] l_pix: nan 
+2025-11-23 13:32:48,695 INFO: [Spars..][epoch: 10, iter: 130,000, lr:(2.747e-05,)] [eta: 7:42:25, time (data): 1.776 (0.038)] l_pix: nan 
+2025-11-23 13:57:46,627 INFO: [Spars..][epoch: 10, iter: 131,000, lr:(2.496e-05,)] [eta: 7:19:56, time (data): 1.237 (0.039)] l_pix: nan 
+2025-11-23 14:21:43,542 INFO: [Spars..][epoch: 10, iter: 132,000, lr:(2.256e-05,)] [eta: 6:57:02, time (data): 1.241 (0.039)] l_pix: nan 
+2025-11-23 14:21:43,543 INFO: Saving models and training states.
+2025-11-23 14:23:31,685 INFO: Validation ValSet,		 # psnr: nan
+2025-11-23 14:46:30,483 INFO: [Spars..][epoch: 10, iter: 133,000, lr:(2.029e-05,)] [eta: 6:34:21, time (data): 1.781 (0.024)] l_pix: nan 
+2025-11-23 15:11:18,356 INFO: [Spars..][epoch: 10, iter: 134,000, lr:(1.813e-05,)] [eta: 6:11:35, time (data): 1.250 (0.033)] l_pix: nan 
+2025-11-23 15:34:47,451 INFO: [Spars..][epoch: 10, iter: 135,000, lr:(1.609e-05,)] [eta: 5:48:26, time (data): 1.244 (0.040)] l_pix: nan 

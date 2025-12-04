@@ -1,0 +1,663 @@
+2025-11-17 22:49:07,739 INFO: 
+                ____                _       _____  ____
+               / __ ) ____ _ _____ (_)_____/ ___/ / __ \
+              / __  |/ __ `// ___// // ___/\__ \ / /_/ /
+             / /_/ // /_/ /(__  )/ // /__ ___/ // _, _/
+            /_____/ \__,_//____//_/ \___//____//_/ |_|
+     ______                   __   __                 __      __
+    / ____/____   ____   ____/ /  / /   __  __ _____ / /__   / /
+   / / __ / __ \ / __ \ / __  /  / /   / / / // ___// //_/  / /
+  / /_/ // /_/ // /_/ // /_/ /  / /___/ /_/ // /__ / /<    /_/
+  \____/ \____/ \____/ \____/  /_____/\____/ \___//_/|_|  (_)
+    
+Version Information: 
+	BasicSR: 1.2.0+863ca48
+	PyTorch: 2.3.1+cu121
+	TorchVision: 0.18.1+cu121
+2025-11-17 22:49:07,740 INFO: 
+  name: MambaIR_MaIRUNet_small_LOLv1_new_1117
+  model_type: ImageCleanModel
+  scale: 1
+  num_gpu: 4
+  manual_seed: 100
+  datasets:[
+    train:[
+      name: TrainSet
+      type: Dataset_PairedImage
+      dataroot_gt: /data/lgl/datasets/LowLight/LOL-v1/our485/high
+      dataroot_lq: /data/lgl/datasets/LowLight/LOL-v1/our485/low
+      geometric_augs: True
+      filename_tmpl: {}
+      io_backend:[
+        type: disk
+      ]
+      use_shuffle: True
+      num_worker_per_gpu: 0
+      batch_size_per_gpu: 1
+      mini_batch_sizes: [8, 5, 4, 2, 1, 1]
+      iters: [92000, 64000, 48000, 36000, 36000, 24000]
+      gt_size: 384
+      gt_sizes: [128, 160, 192, 256, 320, 320]
+      dataset_enlarge_ratio: 100
+      prefetch_mode: None
+      phase: train
+      scale: 1
+    ]
+    val:[
+      name: ValSet
+      type: Dataset_PairedImage
+      dataroot_gt: /data/lgl/datasets/LowLight/LOL-v1/eval15/high
+      dataroot_lq: /data/lgl/datasets/LowLight/LOL-v1/eval15/low
+      io_backend:[
+        type: disk
+      ]
+      phase: val
+      scale: 1
+    ]
+  ]
+  network_g:[
+    type: MaIRUNet
+    img_size: 128
+    patch_size: 1
+    ssm_ratio: 2.0
+    scan_len: 4
+    inp_channels: 3
+    out_channels: 3
+    dim: 48
+    num_blocks: [2, 4, 4, 8]
+    num_refinement_blocks: 2
+    mlp_ratio: 1.5
+    bias: False
+    dual_pixel_task: False
+  ]
+  path:[
+    pretrain_network_g: None
+    strict_load_g: True
+    resume_state: None
+    root: /data/lgl/codes/MambaIR/realDenoising
+    experiments_root: /data/lgl/codes/MambaIR/realDenoising/experiments/MambaIR_MaIRUNet_small_LOLv1_new_1117
+    models: /data/lgl/codes/MambaIR/realDenoising/experiments/MambaIR_MaIRUNet_small_LOLv1_new_1117/models
+    training_states: /data/lgl/codes/MambaIR/realDenoising/experiments/MambaIR_MaIRUNet_small_LOLv1_new_1117/training_states
+    log: /data/lgl/codes/MambaIR/realDenoising/experiments/MambaIR_MaIRUNet_small_LOLv1_new_1117
+    visualization: /data/lgl/codes/MambaIR/realDenoising/experiments/MambaIR_MaIRUNet_small_LOLv1_new_1117/visualization
+  ]
+  train:[
+    total_iter: 300000
+    warmup_iter: -1
+    use_grad_clip: True
+    scheduler:[
+      type: CosineAnnealingRestartCyclicLR
+      periods: [92000, 208000]
+      restart_weights: [1, 1]
+      eta_mins: [0.0003, 1e-06]
+    ]
+    mixing_augs:[
+      mixup: True
+      mixup_beta: 1.2
+      use_identity: True
+    ]
+    optim_g:[
+      type: AdamW
+      lr: 0.0003
+      weight_decay: 0.0001
+      betas: [0.9, 0.999]
+    ]
+    pixel_opt:[
+      type: L1Loss
+      loss_weight: 1
+      reduction: mean
+    ]
+  ]
+  val:[
+    window_size: 8
+    val_freq: 4000.0
+    save_img: False
+    rgb2bgr: True
+    use_image: False
+    max_minibatch: 8
+    metrics:[
+      psnr:[
+        type: calculate_psnr
+        crop_border: 0
+        test_y_channel: False
+      ]
+    ]
+  ]
+  logger:[
+    print_freq: 1000
+    save_checkpoint_freq: 4000.0
+    use_tb_logger: True
+    wandb:[
+      project: None
+      resume_id: None
+    ]
+  ]
+  dist_params:[
+    backend: nccl
+    port: 29500
+  ]
+  is_train: True
+  dist: True
+  rank: 0
+  world_size: 4
+
+2025-11-17 22:49:07,912 INFO: Dataset Dataset_PairedImage - TrainSet is created.
+2025-11-17 22:49:07,913 INFO: Training statistics:
+	Number of train images: 485
+	Dataset enlarge ratio: 100
+	Batch size per gpu: 1
+	World size (gpu number): 4
+	Require iter number per epoch: 12125
+	Total epochs: 25; iters: 300000.
+2025-11-17 22:49:07,914 INFO: Dataset Dataset_PairedImage - ValSet is created.
+2025-11-17 22:49:07,915 INFO: Number of val images/folders in ValSet: 15
+2025-11-17 22:49:10,419 INFO: Network: DistributedDataParallel - MaIRUNet, with parameters: 47,571,180
+2025-11-17 22:49:10,419 INFO: MaIRUNet(
+  (conv_first): Conv2d(3, 48, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  (patch_embed): PatchEmbed(
+    (norm): LayerNorm((48,), eps=1e-05, elementwise_affine=True)
+  )
+  (encoder_level1): ModuleList(
+    (0-1): 2 x RMB(
+      (ln_1): LayerNorm((48,), eps=1e-05, elementwise_affine=True)
+      (self_attention): VMM(
+        (in_proj): Linear(in_features=48, out_features=192, bias=False)
+        (conv2d): Conv2d(96, 96, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=96)
+        (act): SiLU()
+        (out_norm): LayerNorm((96,), eps=1e-05, elementwise_affine=True)
+        (out_proj): Linear(in_features=96, out_features=48, bias=False)
+        (gating): ShuffleAttn(
+          (gating): Sequential(
+            (0): AdaptiveAvgPool2d(output_size=1)
+            (1): Conv2d(384, 384, kernel_size=(1, 1), stride=(1, 1), groups=96)
+            (2): Sigmoid()
+          )
+        )
+      )
+      (drop_path): DropPath()
+      (conv_blk): FeedForwardMoE(
+        (act): GELU(approximate='none')
+        (project_in): Linear(in_features=48, out_features=72, bias=True)
+        (experts): ModuleList(
+          (0): Sequential(
+            (0): Linear(in_features=72, out_features=72, bias=True)
+            (1): GELU(approximate='none')
+            (2): Linear(in_features=72, out_features=72, bias=True)
+          )
+          (1): Sequential(
+            (0): Linear(in_features=72, out_features=57, bias=True)
+            (1): GELU(approximate='none')
+            (2): Linear(in_features=57, out_features=72, bias=True)
+          )
+          (2): Sequential(
+            (0): Linear(in_features=72, out_features=86, bias=True)
+            (1): GELU(approximate='none')
+            (2): Linear(in_features=86, out_features=72, bias=True)
+          )
+        )
+        (illum_to_logits): Linear(in_features=72, out_features=3, bias=True)
+        (mix_proj): Sequential(
+          (0): Linear(in_features=72, out_features=72, bias=True)
+          (1): GELU(approximate='none')
+        )
+        (project_out): Linear(in_features=72, out_features=48, bias=True)
+        (drop): Identity()
+      )
+      (ln_2): LayerNorm((48,), eps=1e-05, elementwise_affine=True)
+    )
+  )
+  (down1_2): Downsample(
+    (body): Sequential(
+      (0): Conv2d(48, 24, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): PixelUnshuffle(downscale_factor=2)
+    )
+  )
+  (encoder_level2): ModuleList(
+    (0-3): 4 x RMB(
+      (ln_1): LayerNorm((96,), eps=1e-05, elementwise_affine=True)
+      (self_attention): VMM(
+        (in_proj): Linear(in_features=96, out_features=384, bias=False)
+        (conv2d): Conv2d(192, 192, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=192)
+        (act): SiLU()
+        (out_norm): LayerNorm((192,), eps=1e-05, elementwise_affine=True)
+        (out_proj): Linear(in_features=192, out_features=96, bias=False)
+        (gating): ShuffleAttn(
+          (gating): Sequential(
+            (0): AdaptiveAvgPool2d(output_size=1)
+            (1): Conv2d(768, 768, kernel_size=(1, 1), stride=(1, 1), groups=192)
+            (2): Sigmoid()
+          )
+        )
+      )
+      (drop_path): DropPath()
+      (conv_blk): FeedForwardMoE(
+        (act): GELU(approximate='none')
+        (project_in): Linear(in_features=96, out_features=144, bias=True)
+        (experts): ModuleList(
+          (0): Sequential(
+            (0): Linear(in_features=144, out_features=144, bias=True)
+            (1): GELU(approximate='none')
+            (2): Linear(in_features=144, out_features=144, bias=True)
+          )
+          (1): Sequential(
+            (0): Linear(in_features=144, out_features=115, bias=True)
+            (1): GELU(approximate='none')
+            (2): Linear(in_features=115, out_features=144, bias=True)
+          )
+          (2): Sequential(
+            (0): Linear(in_features=144, out_features=172, bias=True)
+            (1): GELU(approximate='none')
+            (2): Linear(in_features=172, out_features=144, bias=True)
+          )
+        )
+        (illum_to_logits): Linear(in_features=144, out_features=3, bias=True)
+        (mix_proj): Sequential(
+          (0): Linear(in_features=144, out_features=144, bias=True)
+          (1): GELU(approximate='none')
+        )
+        (project_out): Linear(in_features=144, out_features=96, bias=True)
+        (drop): Identity()
+      )
+      (ln_2): LayerNorm((96,), eps=1e-05, elementwise_affine=True)
+    )
+  )
+  (down2_3): Downsample(
+    (body): Sequential(
+      (0): Conv2d(96, 48, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): PixelUnshuffle(downscale_factor=2)
+    )
+  )
+  (encoder_level3): ModuleList(
+    (0-3): 4 x RMB(
+      (ln_1): LayerNorm((192,), eps=1e-05, elementwise_affine=True)
+      (self_attention): VMM(
+        (in_proj): Linear(in_features=192, out_features=768, bias=False)
+        (conv2d): Conv2d(384, 384, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=384)
+        (act): SiLU()
+        (out_norm): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+        (out_proj): Linear(in_features=384, out_features=192, bias=False)
+        (gating): ShuffleAttn(
+          (gating): Sequential(
+            (0): AdaptiveAvgPool2d(output_size=1)
+            (1): Conv2d(1536, 1536, kernel_size=(1, 1), stride=(1, 1), groups=384)
+            (2): Sigmoid()
+          )
+        )
+      )
+      (drop_path): DropPath()
+      (conv_blk): FeedForwardMoE(
+        (act): GELU(approximate='none')
+        (project_in): Linear(in_features=192, out_features=288, bias=True)
+        (experts): ModuleList(
+          (0): Sequential(
+            (0): Linear(in_features=288, out_features=288, bias=True)
+            (1): GELU(approximate='none')
+            (2): Linear(in_features=288, out_features=288, bias=True)
+          )
+          (1): Sequential(
+            (0): Linear(in_features=288, out_features=230, bias=True)
+            (1): GELU(approximate='none')
+            (2): Linear(in_features=230, out_features=288, bias=True)
+          )
+          (2): Sequential(
+            (0): Linear(in_features=288, out_features=345, bias=True)
+            (1): GELU(approximate='none')
+            (2): Linear(in_features=345, out_features=288, bias=True)
+          )
+        )
+        (illum_to_logits): Linear(in_features=288, out_features=3, bias=True)
+        (mix_proj): Sequential(
+          (0): Linear(in_features=288, out_features=288, bias=True)
+          (1): GELU(approximate='none')
+        )
+        (project_out): Linear(in_features=288, out_features=192, bias=True)
+        (drop): Identity()
+      )
+      (ln_2): LayerNorm((192,), eps=1e-05, elementwise_affine=True)
+    )
+  )
+  (down3_4): Downsample(
+    (body): Sequential(
+      (0): Conv2d(192, 96, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): PixelUnshuffle(downscale_factor=2)
+    )
+  )
+  (latent): ModuleList(
+    (0-7): 8 x RMB(
+      (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+      (self_attention): VMM(
+        (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+        (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+        (act): SiLU()
+        (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+        (out_proj): Linear(in_features=768, out_features=384, bias=False)
+        (gating): ShuffleAttn(
+          (gating): Sequential(
+            (0): AdaptiveAvgPool2d(output_size=1)
+            (1): Conv2d(3072, 3072, kernel_size=(1, 1), stride=(1, 1), groups=768)
+            (2): Sigmoid()
+          )
+        )
+      )
+      (drop_path): DropPath()
+      (conv_blk): FeedForwardMoE(
+        (act): GELU(approximate='none')
+        (project_in): Linear(in_features=384, out_features=576, bias=True)
+        (experts): ModuleList(
+          (0): Sequential(
+            (0): Linear(in_features=576, out_features=576, bias=True)
+            (1): GELU(approximate='none')
+            (2): Linear(in_features=576, out_features=576, bias=True)
+          )
+          (1): Sequential(
+            (0): Linear(in_features=576, out_features=460, bias=True)
+            (1): GELU(approximate='none')
+            (2): Linear(in_features=460, out_features=576, bias=True)
+          )
+          (2): Sequential(
+            (0): Linear(in_features=576, out_features=691, bias=True)
+            (1): GELU(approximate='none')
+            (2): Linear(in_features=691, out_features=576, bias=True)
+          )
+        )
+        (illum_to_logits): Linear(in_features=576, out_features=3, bias=True)
+        (mix_proj): Sequential(
+          (0): Linear(in_features=576, out_features=576, bias=True)
+          (1): GELU(approximate='none')
+        )
+        (project_out): Linear(in_features=576, out_features=384, bias=True)
+        (drop): Identity()
+      )
+      (ln_2): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+    )
+  )
+  (up4_3): Upsample(
+    (body): Sequential(
+      (0): Conv2d(384, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): PixelShuffle(upscale_factor=2)
+    )
+  )
+  (reduce_chan_level3): Conv2d(384, 192, kernel_size=(1, 1), stride=(1, 1), bias=False)
+  (decoder_level3): ModuleList(
+    (0-3): 4 x RMB(
+      (ln_1): LayerNorm((192,), eps=1e-05, elementwise_affine=True)
+      (self_attention): VMM(
+        (in_proj): Linear(in_features=192, out_features=768, bias=False)
+        (conv2d): Conv2d(384, 384, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=384)
+        (act): SiLU()
+        (out_norm): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+        (out_proj): Linear(in_features=384, out_features=192, bias=False)
+        (gating): ShuffleAttn(
+          (gating): Sequential(
+            (0): AdaptiveAvgPool2d(output_size=1)
+            (1): Conv2d(1536, 1536, kernel_size=(1, 1), stride=(1, 1), groups=384)
+            (2): Sigmoid()
+          )
+        )
+      )
+      (drop_path): DropPath()
+      (conv_blk): FeedForwardMoE(
+        (act): GELU(approximate='none')
+        (project_in): Linear(in_features=192, out_features=288, bias=True)
+        (experts): ModuleList(
+          (0): Sequential(
+            (0): Linear(in_features=288, out_features=288, bias=True)
+            (1): GELU(approximate='none')
+            (2): Linear(in_features=288, out_features=288, bias=True)
+          )
+          (1): Sequential(
+            (0): Linear(in_features=288, out_features=230, bias=True)
+            (1): GELU(approximate='none')
+            (2): Linear(in_features=230, out_features=288, bias=True)
+          )
+          (2): Sequential(
+            (0): Linear(in_features=288, out_features=345, bias=True)
+            (1): GELU(approximate='none')
+            (2): Linear(in_features=345, out_features=288, bias=True)
+          )
+        )
+        (illum_to_logits): Linear(in_features=288, out_features=3, bias=True)
+        (mix_proj): Sequential(
+          (0): Linear(in_features=288, out_features=288, bias=True)
+          (1): GELU(approximate='none')
+        )
+        (project_out): Linear(in_features=288, out_features=192, bias=True)
+        (drop): Identity()
+      )
+      (ln_2): LayerNorm((192,), eps=1e-05, elementwise_affine=True)
+    )
+  )
+  (up3_2): Upsample(
+    (body): Sequential(
+      (0): Conv2d(192, 384, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): PixelShuffle(upscale_factor=2)
+    )
+  )
+  (reduce_chan_level2): Conv2d(192, 96, kernel_size=(1, 1), stride=(1, 1), bias=False)
+  (decoder_level2): ModuleList(
+    (0-3): 4 x RMB(
+      (ln_1): LayerNorm((96,), eps=1e-05, elementwise_affine=True)
+      (self_attention): VMM(
+        (in_proj): Linear(in_features=96, out_features=384, bias=False)
+        (conv2d): Conv2d(192, 192, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=192)
+        (act): SiLU()
+        (out_norm): LayerNorm((192,), eps=1e-05, elementwise_affine=True)
+        (out_proj): Linear(in_features=192, out_features=96, bias=False)
+        (gating): ShuffleAttn(
+          (gating): Sequential(
+            (0): AdaptiveAvgPool2d(output_size=1)
+            (1): Conv2d(768, 768, kernel_size=(1, 1), stride=(1, 1), groups=192)
+            (2): Sigmoid()
+          )
+        )
+      )
+      (drop_path): DropPath()
+      (conv_blk): FeedForwardMoE(
+        (act): GELU(approximate='none')
+        (project_in): Linear(in_features=96, out_features=144, bias=True)
+        (experts): ModuleList(
+          (0): Sequential(
+            (0): Linear(in_features=144, out_features=144, bias=True)
+            (1): GELU(approximate='none')
+            (2): Linear(in_features=144, out_features=144, bias=True)
+          )
+          (1): Sequential(
+            (0): Linear(in_features=144, out_features=115, bias=True)
+            (1): GELU(approximate='none')
+            (2): Linear(in_features=115, out_features=144, bias=True)
+          )
+          (2): Sequential(
+            (0): Linear(in_features=144, out_features=172, bias=True)
+            (1): GELU(approximate='none')
+            (2): Linear(in_features=172, out_features=144, bias=True)
+          )
+        )
+        (illum_to_logits): Linear(in_features=144, out_features=3, bias=True)
+        (mix_proj): Sequential(
+          (0): Linear(in_features=144, out_features=144, bias=True)
+          (1): GELU(approximate='none')
+        )
+        (project_out): Linear(in_features=144, out_features=96, bias=True)
+        (drop): Identity()
+      )
+      (ln_2): LayerNorm((96,), eps=1e-05, elementwise_affine=True)
+    )
+  )
+  (up2_1): Upsample(
+    (body): Sequential(
+      (0): Conv2d(96, 192, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (1): PixelShuffle(upscale_factor=2)
+    )
+  )
+  (decoder_level1): ModuleList(
+    (0-1): 2 x RMB(
+      (ln_1): LayerNorm((96,), eps=1e-05, elementwise_affine=True)
+      (self_attention): VMM(
+        (in_proj): Linear(in_features=96, out_features=384, bias=False)
+        (conv2d): Conv2d(192, 192, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=192)
+        (act): SiLU()
+        (out_norm): LayerNorm((192,), eps=1e-05, elementwise_affine=True)
+        (out_proj): Linear(in_features=192, out_features=96, bias=False)
+        (gating): ShuffleAttn(
+          (gating): Sequential(
+            (0): AdaptiveAvgPool2d(output_size=1)
+            (1): Conv2d(768, 768, kernel_size=(1, 1), stride=(1, 1), groups=192)
+            (2): Sigmoid()
+          )
+        )
+      )
+      (drop_path): DropPath()
+      (conv_blk): FeedForwardMoE(
+        (act): GELU(approximate='none')
+        (project_in): Linear(in_features=96, out_features=144, bias=True)
+        (experts): ModuleList(
+          (0): Sequential(
+            (0): Linear(in_features=144, out_features=144, bias=True)
+            (1): GELU(approximate='none')
+            (2): Linear(in_features=144, out_features=144, bias=True)
+          )
+          (1): Sequential(
+            (0): Linear(in_features=144, out_features=115, bias=True)
+            (1): GELU(approximate='none')
+            (2): Linear(in_features=115, out_features=144, bias=True)
+          )
+          (2): Sequential(
+            (0): Linear(in_features=144, out_features=172, bias=True)
+            (1): GELU(approximate='none')
+            (2): Linear(in_features=172, out_features=144, bias=True)
+          )
+        )
+        (illum_to_logits): Linear(in_features=144, out_features=3, bias=True)
+        (mix_proj): Sequential(
+          (0): Linear(in_features=144, out_features=144, bias=True)
+          (1): GELU(approximate='none')
+        )
+        (project_out): Linear(in_features=144, out_features=96, bias=True)
+        (drop): Identity()
+      )
+      (ln_2): LayerNorm((96,), eps=1e-05, elementwise_affine=True)
+    )
+  )
+  (refinement): ModuleList(
+    (0-1): 2 x RMB(
+      (ln_1): LayerNorm((96,), eps=1e-05, elementwise_affine=True)
+      (self_attention): VMM(
+        (in_proj): Linear(in_features=96, out_features=384, bias=False)
+        (conv2d): Conv2d(192, 192, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=192)
+        (act): SiLU()
+        (out_norm): LayerNorm((192,), eps=1e-05, elementwise_affine=True)
+        (out_proj): Linear(in_features=192, out_features=96, bias=False)
+        (gating): ShuffleAttn(
+          (gating): Sequential(
+            (0): AdaptiveAvgPool2d(output_size=1)
+            (1): Conv2d(768, 768, kernel_size=(1, 1), stride=(1, 1), groups=192)
+            (2): Sigmoid()
+          )
+        )
+      )
+      (drop_path): DropPath()
+      (conv_blk): FeedForwardMoE(
+        (act): GELU(approximate='none')
+        (project_in): Linear(in_features=96, out_features=144, bias=True)
+        (experts): ModuleList(
+          (0): Sequential(
+            (0): Linear(in_features=144, out_features=144, bias=True)
+            (1): GELU(approximate='none')
+            (2): Linear(in_features=144, out_features=144, bias=True)
+          )
+          (1): Sequential(
+            (0): Linear(in_features=144, out_features=115, bias=True)
+            (1): GELU(approximate='none')
+            (2): Linear(in_features=115, out_features=144, bias=True)
+          )
+          (2): Sequential(
+            (0): Linear(in_features=144, out_features=172, bias=True)
+            (1): GELU(approximate='none')
+            (2): Linear(in_features=172, out_features=144, bias=True)
+          )
+        )
+        (illum_to_logits): Linear(in_features=144, out_features=3, bias=True)
+        (mix_proj): Sequential(
+          (0): Linear(in_features=144, out_features=144, bias=True)
+          (1): GELU(approximate='none')
+        )
+        (project_out): Linear(in_features=144, out_features=96, bias=True)
+        (drop): Identity()
+      )
+      (ln_2): LayerNorm((96,), eps=1e-05, elementwise_affine=True)
+    )
+  )
+  (output): Conv2d(96, 3, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+)
+2025-11-17 22:49:10,438 INFO: Model [ImageCleanModel] is created.
+2025-11-17 22:49:10,439 INFO: Start training from epoch: 0, iter: 0
+2025-11-17 22:49:10,498 INFO: 
+ Updating Patch_Size to 128 and Batch_Size to 32 
+
+2025-11-17 23:10:39,012 INFO: [Mamba..][epoch:  0, iter:   1,000, lr:(3.000e-04,)] [eta: 4 days, 10:54:57, time (data): 1.218 (0.036)] l_pix: 1.0716e-01 
+2025-11-17 23:32:58,255 INFO: [Mamba..][epoch:  0, iter:   2,000, lr:(3.000e-04,)] [eta: 4 days, 12:42:27, time (data): 1.220 (0.036)] l_pix: 6.6923e-02 
+2025-11-17 23:57:07,178 INFO: [Mamba..][epoch:  0, iter:   3,000, lr:(3.000e-04,)] [eta: 4 days, 16:04:21, time (data): 1.223 (0.028)] l_pix: 1.0964e-01 
+2025-11-18 00:19:29,951 INFO: [Mamba..][epoch:  0, iter:   4,000, lr:(3.000e-04,)] [eta: 4 days, 15:22:22, time (data): 1.288 (0.023)] l_pix: 2.0385e-01 
+2025-11-18 00:19:29,952 INFO: Saving models and training states.
+2025-11-18 00:21:23,942 INFO: Validation ValSet,		 # psnr: 17.8740
+2025-11-18 00:43:04,640 INFO: [Mamba..][epoch:  0, iter:   5,000, lr:(3.000e-04,)] [eta: 4 days, 15:58:55, time (data): 1.225 (0.031)] l_pix: 4.5513e-02 
+2025-11-18 01:05:33,751 INFO: [Mamba..][epoch:  0, iter:   6,000, lr:(3.000e-04,)] [eta: 4 days, 15:21:54, time (data): 1.276 (0.035)] l_pix: 1.0361e-01 
+2025-11-18 01:28:24,609 INFO: [Mamba..][epoch:  0, iter:   7,000, lr:(3.000e-04,)] [eta: 4 days, 15:04:11, time (data): 1.508 (0.027)] l_pix: 6.5289e-02 
+2025-11-18 01:52:17,732 INFO: [Mamba..][epoch:  0, iter:   8,000, lr:(3.000e-04,)] [eta: 4 days, 15:23:04, time (data): 1.219 (0.037)] l_pix: 1.8103e-01 
+2025-11-18 01:52:17,733 INFO: Saving models and training states.
+2025-11-18 01:54:10,184 INFO: Validation ValSet,		 # psnr: 19.8339
+2025-11-18 02:16:30,651 INFO: [Mamba..][epoch:  0, iter:   9,000, lr:(3.000e-04,)] [eta: 4 days, 15:43:07, time (data): 1.211 (0.027)] l_pix: 1.7809e-01 
+2025-11-18 02:39:37,354 INFO: [Mamba..][epoch:  0, iter:  10,000, lr:(3.000e-04,)] [eta: 4 days, 15:22:19, time (data): 1.595 (0.035)] l_pix: 1.7411e-01 
+2025-11-18 03:02:32,688 INFO: [Mamba..][epoch:  0, iter:  11,000, lr:(3.000e-04,)] [eta: 4 days, 14:56:06, time (data): 1.142 (0.025)] l_pix: 6.9485e-02 
+2025-11-18 03:25:14,169 INFO: [Mamba..][epoch:  0, iter:  12,000, lr:(3.000e-04,)] [eta: 4 days, 14:24:55, time (data): 1.200 (0.035)] l_pix: 6.6072e-02 
+2025-11-18 03:25:14,171 INFO: Saving models and training states.
+2025-11-18 03:27:06,727 INFO: Validation ValSet,		 # psnr: 20.6906
+2025-11-18 03:49:14,125 INFO: [Mamba..][epoch:  1, iter:  13,000, lr:(3.000e-04,)] [eta: 4 days, 14:23:54, time (data): 1.199 (0.036)] l_pix: 9.1609e-02 
+2025-11-18 04:10:57,246 INFO: [Mamba..][epoch:  1, iter:  14,000, lr:(3.000e-04,)] [eta: 4 days, 13:33:00, time (data): 1.217 (0.022)] l_pix: 1.3482e-01 
+2025-11-18 04:32:53,442 INFO: [Mamba..][epoch:  1, iter:  15,000, lr:(3.000e-04,)] [eta: 4 days, 12:50:09, time (data): 1.315 (0.027)] l_pix: 1.0552e-01 
+2025-11-18 04:54:50,460 INFO: [Mamba..][epoch:  1, iter:  16,000, lr:(3.000e-04,)] [eta: 4 days, 12:10:09, time (data): 1.296 (0.034)] l_pix: 7.5987e-02 
+2025-11-18 04:54:50,461 INFO: Saving models and training states.
+2025-11-18 04:56:42,816 INFO: Validation ValSet,		 # psnr: 19.8624
+2025-11-18 05:19:54,205 INFO: [Mamba..][epoch:  1, iter:  17,000, lr:(3.000e-04,)] [eta: 4 days, 12:24:05, time (data): 1.228 (0.027)] l_pix: 6.5905e-02 
+2025-11-18 05:43:51,368 INFO: [Mamba..][epoch:  1, iter:  18,000, lr:(3.000e-04,)] [eta: 4 days, 12:16:18, time (data): 1.609 (0.037)] l_pix: 1.7855e-01 
+2025-11-18 06:08:13,306 INFO: [Mamba..][epoch:  1, iter:  19,000, lr:(3.000e-04,)] [eta: 4 days, 12:12:55, time (data): 1.595 (0.035)] l_pix: 1.1171e-01 
+2025-11-18 06:31:14,142 INFO: [Mamba..][epoch:  1, iter:  20,000, lr:(3.000e-04,)] [eta: 4 days, 11:48:31, time (data): 1.215 (0.031)] l_pix: 7.5152e-02 
+2025-11-18 06:31:14,144 INFO: Saving models and training states.
+2025-11-18 06:33:06,541 INFO: Validation ValSet,		 # psnr: 19.7179
+2025-11-18 06:54:40,613 INFO: [Mamba..][epoch:  1, iter:  21,000, lr:(3.000e-04,)] [eta: 4 days, 11:29:55, time (data): 1.591 (0.023)] l_pix: 9.1288e-02 
+2025-11-18 07:17:50,399 INFO: [Mamba..][epoch:  1, iter:  22,000, lr:(3.000e-04,)] [eta: 4 days, 11:07:22, time (data): 1.224 (0.028)] l_pix: 7.7589e-02 
+2025-11-18 07:39:00,067 INFO: [Mamba..][epoch:  1, iter:  23,000, lr:(3.000e-04,)] [eta: 4 days, 10:20:39, time (data): 1.589 (0.036)] l_pix: 1.7275e-01 
+2025-11-18 08:01:59,167 INFO: [Mamba..][epoch:  1, iter:  24,000, lr:(3.000e-04,)] [eta: 4 days, 9:57:03, time (data): 1.211 (0.035)] l_pix: 8.2744e-02 
+2025-11-18 08:01:59,168 INFO: Saving models and training states.
+2025-11-18 08:03:51,632 INFO: Validation ValSet,		 # psnr: 20.1867
+2025-11-18 08:27:13,943 INFO: [Mamba..][epoch:  2, iter:  25,000, lr:(3.000e-04,)] [eta: 4 days, 9:58:21, time (data): 1.214 (0.034)] l_pix: 1.5168e-01 
+2025-11-18 08:49:23,745 INFO: [Mamba..][epoch:  2, iter:  26,000, lr:(3.000e-04,)] [eta: 4 days, 9:25:08, time (data): 1.232 (0.025)] l_pix: 6.9986e-02 
+2025-11-18 09:10:32,832 INFO: [Mamba..][epoch:  2, iter:  27,000, lr:(3.000e-04,)] [eta: 4 days, 8:42:31, time (data): 1.213 (0.035)] l_pix: 9.4788e-02 
+2025-11-18 09:33:34,668 INFO: [Mamba..][epoch:  2, iter:  28,000, lr:(3.000e-04,)] [eta: 4 days, 8:19:40, time (data): 1.221 (0.028)] l_pix: 1.3460e-01 
+2025-11-18 09:33:34,670 INFO: Saving models and training states.
+2025-11-18 09:35:27,117 INFO: Validation ValSet,		 # psnr: 20.2605
+2025-11-18 09:57:08,983 INFO: [Mamba..][epoch:  2, iter:  29,000, lr:(3.000e-04,)] [eta: 4 days, 8:01:52, time (data): 1.282 (0.035)] l_pix: 7.3618e-02 
+2025-11-18 10:18:14,078 INFO: [Mamba..][epoch:  2, iter:  30,000, lr:(3.000e-04,)] [eta: 4 days, 7:21:18, time (data): 1.196 (0.035)] l_pix: 9.2091e-02 
+2025-11-18 10:40:04,813 INFO: [Mamba..][epoch:  2, iter:  31,000, lr:(3.000e-04,)] [eta: 4 days, 6:48:36, time (data): 1.340 (0.029)] l_pix: 4.5441e-02 
+2025-11-18 11:02:56,100 INFO: [Mamba..][epoch:  2, iter:  32,000, lr:(3.000e-04,)] [eta: 4 days, 6:25:02, time (data): 1.293 (0.035)] l_pix: 6.2949e-02 
+2025-11-18 11:02:56,101 INFO: Saving models and training states.
+2025-11-18 11:04:48,604 INFO: Validation ValSet,		 # psnr: 19.8841
+2025-11-18 11:26:36,970 INFO: [Mamba..][epoch:  2, iter:  33,000, lr:(3.000e-04,)] [eta: 4 days, 6:08:11, time (data): 1.304 (0.035)] l_pix: 8.5861e-02 
+2025-11-18 11:49:31,169 INFO: [Mamba..][epoch:  2, iter:  34,000, lr:(3.000e-04,)] [eta: 4 days, 5:44:51, time (data): 1.306 (0.034)] l_pix: 8.2927e-02 
+2025-11-18 12:12:37,739 INFO: [Mamba..][epoch:  2, iter:  35,000, lr:(3.000e-04,)] [eta: 4 days, 5:23:06, time (data): 1.225 (0.034)] l_pix: 4.1355e-02 
+2025-11-18 12:34:01,954 INFO: [Mamba..][epoch:  2, iter:  36,000, lr:(3.000e-04,)] [eta: 4 days, 4:48:46, time (data): 1.298 (0.036)] l_pix: 6.5035e-02 
+2025-11-18 12:34:01,956 INFO: Saving models and training states.
+2025-11-18 12:35:54,622 INFO: Validation ValSet,		 # psnr: 20.2663
+2025-11-18 12:59:21,303 INFO: [Mamba..][epoch:  3, iter:  37,000, lr:(3.000e-04,)] [eta: 4 days, 4:42:59, time (data): 1.297 (0.035)] l_pix: 7.1620e-02 
+2025-11-18 13:22:03,504 INFO: [Mamba..][epoch:  3, iter:  38,000, lr:(3.000e-04,)] [eta: 4 days, 4:18:07, time (data): 1.224 (0.024)] l_pix: 7.9169e-02 
+2025-11-18 13:43:56,898 INFO: [Mamba..][epoch:  3, iter:  39,000, lr:(3.000e-04,)] [eta: 4 days, 3:47:55, time (data): 1.302 (0.029)] l_pix: 3.6041e-02 
+2025-11-18 14:08:20,901 INFO: [Mamba..][epoch:  3, iter:  40,000, lr:(3.000e-04,)] [eta: 4 days, 3:34:27, time (data): 1.598 (0.036)] l_pix: 4.6249e-02 
+2025-11-18 14:08:20,902 INFO: Saving models and training states.
+2025-11-18 14:10:13,201 INFO: Validation ValSet,		 # psnr: 21.3957
+2025-11-18 14:32:56,125 INFO: [Mamba..][epoch:  3, iter:  41,000, lr:(3.000e-04,)] [eta: 4 days, 3:21:38, time (data): 1.219 (0.037)] l_pix: 7.5263e-02 
+2025-11-18 14:52:39,331 INFO: [Mamba..][epoch:  3, iter:  42,000, lr:(3.000e-04,)] [eta: 4 days, 2:38:21, time (data): 1.226 (0.035)] l_pix: 4.2731e-02 
+2025-11-18 15:15:08,786 INFO: [Mamba..][epoch:  3, iter:  43,000, lr:(3.000e-04,)] [eta: 4 days, 2:12:44, time (data): 1.604 (0.037)] l_pix: 5.3199e-02 
+2025-11-18 15:36:44,715 INFO: [Mamba..][epoch:  3, iter:  44,000, lr:(3.000e-04,)] [eta: 4 days, 1:42:04, time (data): 1.225 (0.027)] l_pix: 5.7465e-02 
+2025-11-18 15:36:44,716 INFO: Saving models and training states.
+2025-11-18 15:38:38,347 INFO: Validation ValSet,		 # psnr: 20.5169
+2025-11-18 16:00:18,964 INFO: [Mamba..][epoch:  3, iter:  45,000, lr:(3.000e-04,)] [eta: 4 days, 1:22:59, time (data): 1.246 (0.028)] l_pix: 5.4698e-02 
