@@ -111,7 +111,7 @@ train:
 # validation settings
 val:
   window_size: 8
-  val_freq: !!float 4e4
+  val_freq: !!float 3e4
   save_img: false
   rgb2bgr: true
   use_image: false
@@ -125,8 +125,8 @@ val:
 
 # logging settings
 logger:
-  print_freq: 10000
-  save_checkpoint_freq: !!float 4e4
+  print_freq: 1000
+  save_checkpoint_freq: !!float 3e4
   use_tb_logger: true
   wandb:
     project: ~
