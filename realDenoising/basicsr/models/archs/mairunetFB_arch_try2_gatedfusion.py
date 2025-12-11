@@ -1740,8 +1740,8 @@ class MambaIRUNetRetinex(nn.Module):
 
 
 if __name__ == '__main__':
-    height = 128
-    width = 128
+    height = 64
+    width = 64
     model = MaIRUNetFB(
         inp_channels=3,
         out_channels=3,
