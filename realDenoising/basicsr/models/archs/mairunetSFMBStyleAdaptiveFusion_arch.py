@@ -1271,11 +1271,17 @@ class RMB(nn.Module):
             x_ssm = self.drop_path(self.self_attention(x, (mair_ids[0], mair_ids[1])))
 
         x_freq = self.frequency(x)
-        x_ssm = x_ssm.reshape(B, -1, C)
-        x_freq = x_freq.reshape(B, -1, C)
+        #x_ssm = x_ssm.reshape(B, -1, C)
+        #x_freq = x_freq.reshape(B, -1, C)
+
+        x_ssm = x_ssm.permute(0, 3, 1, 2).contiguous()
+        x_freq = x_freq.permute(0,3,1,2).contiguous()
 
         x_out = self.fuse_module(x_ssm, x_freq)
 
+        x_out = x_out.permute(0,2,3,1).contiguous()
+        
+        x_out = x_out.reshape(B, -1, C)
         return x_out
     
     def flops(self):
