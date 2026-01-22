@@ -5,6 +5,7 @@ import numpy as np
 import networks
 import torch.backends.cudnn as cudnn
 import pytorch_ssim
+import networks
 
 from basicsr.models.losses.loss_util import weighted_loss
 
@@ -199,7 +200,9 @@ class EnhancedHybridLoss(nn.Module):
         # load VGG19 function
         self.VGG = networks.VGG19(init_weights='./pre_trained_VGG19_model/vgg19.pth', feature_mode=True)
         self.VGG.cuda() 
-        self.VGG.eval()    
+        self.VGG.eval()  
+        self.L2 = nn.MSELoss()
+  
 
     def forward(self, x, y):
         # 原有的损失项
@@ -208,7 +211,7 @@ class EnhancedHybridLoss(nn.Module):
         result_feature = self.VGG(x)
         target_feature = self.VGG(y) 
         loss_per = 0.001*self.L2(result_feature, target_feature) 
-        loss_ssim=0.002*(1-pytorch_ssim.ssim(x, 7))
+        loss_ssim=0.002*(1-pytorch_ssim.ssim(x, y))
         loss_spatial = loss_l1+loss_ssim+loss_per  
         
         # 频域损失项
