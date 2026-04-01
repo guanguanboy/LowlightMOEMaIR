@@ -200,5 +200,5 @@ This code is based on [BasicSR](https://github.com/XPixelGroup/BasicSR), [MaIR](
 
 ## Contact
 
-If you have any questions, feel free to approach me at cshguo@gmail.com
+If you have any questions, feel free to approach me at liguanlin1229@gmail.com
 
