@@ -30,13 +30,13 @@
 
 
 
-## <a name="results"></a> 🥇 Results with MambaIRv2
+## <a name="results"></a> 🥇 Results with SFIM-LLIE
 
 We achieve state-of-the-art performance on various image restoration tasks. Detailed results can be found in the paper.
 
 
 <details>
-<summary>Evaluation on Classic SR (click to expand)</summary>
+<summary>Evaluation on LOLv1 (click to expand)</summary>
 
 <p align="center">
   <img width="500" src="assets/classicSR.png">
@@ -46,7 +46,7 @@ We achieve state-of-the-art performance on various image restoration tasks. Deta
 
 
 <details>
-<summary>Evaluation on Lightweight SR (click to expand)</summary>
+<summary>Evaluation on LOLv2-real (click to expand)</summary>
 
 <p align="center">
   <img width="500" src="assets/lightSR.png">
@@ -55,7 +55,7 @@ We achieve state-of-the-art performance on various image restoration tasks. Deta
 
 
 <details>
-<summary>Evaluation on Gaussian Color Image Denoising (click to expand)</summary>
+<summary>Evaluation on LOLv2-syn (click to expand)</summary>
 
 <p align="center">
   <img width="500" src="assets/gaussian_dn.png">
@@ -65,7 +65,7 @@ We achieve state-of-the-art performance on various image restoration tasks. Deta
 
 
 <details>
-<summary>Evaluation on JPEG CAR (click to expand)</summary>
+<summary>Evaluation on SDSD-indoor (click to expand)</summary>
 
 <p align="center">
   <img width="500" src="assets/car.png">
