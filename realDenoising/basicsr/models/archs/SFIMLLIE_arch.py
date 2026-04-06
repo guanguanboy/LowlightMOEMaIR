@@ -624,7 +624,13 @@ class SaSSM_LoSh2D(nn.Module):
 
         # --- 步骤 4: 照度引导的自适应聚合 (SSA 核心) ---
         # 将原有的 y = y1 + y2 + y3 + y4 替换为加权聚合
-        y = (y_multi * ssa_weights.unsqueeze(2)).sum(dim=1) # B, C_inner, H, W
+        # 在第 627 行之前添加
+        #print(f"DEBUG: y_multi shape: {y_multi.shape}")
+        #print(f"DEBUG: ssa_weights shape: {ssa_weights.shape}")
+        
+        y = (y_multi.view(B, 4, -1, H, W) * ssa_weights.unsqueeze(2)).view(B, -1, H, W) # B, C_inner, H, W
+        #y = (y_multi * ssa_weights).view(B, -1, H, W)
+        #print(f"DEBUG: y_multi shape: {y.shape}")
         y1, y2, y3, y4 = torch.chunk(y, 4, dim=1)
         y = y1 + y2 + y3 + y4
 
