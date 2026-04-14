@@ -16,7 +16,7 @@ datasets:
     cache_data: true
     N_frames: 5
     padding: new_info
-    train_size: [240, 128]
+    train_size: [960, 512]
     testing_dir: pair11,pair21,pair1,pair19,pair4,pair9
 
     io_backend:
