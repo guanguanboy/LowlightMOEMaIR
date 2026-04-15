@@ -8,7 +8,7 @@ import torch
 import torch.nn as nn
 import torch.utils.checkpoint as checkpoint
 import torch.nn.functional as F
-from basicsr.archs.arch_util import to_2tuple, trunc_normal_
+from basicsr.models.archs.arch_util import to_2tuple, trunc_normal_
 from mamba_ssm.ops.selective_scan_interface import selective_scan_fn, selective_scan_ref
 from einops import rearrange, repeat
 
