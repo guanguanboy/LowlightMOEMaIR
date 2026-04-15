@@ -190,6 +190,14 @@ python basicsr/test.py -opt options/test_SFIMLLIE_LOLv1.yml
 python basicsr/test.py -opt options/test_SFIMLLIE_LOLv2-syn.yml
 ```
 
+### Compute ERF
+
+```
+# test on LOLv1 for image enhancement. 
+python analysis/erf.py -opt options/test_SFIMLLIE_LOLv1.yml
+```
+
+
 ## License
 
 This project is released under the [Apache 2.0 license](LICENSE).
