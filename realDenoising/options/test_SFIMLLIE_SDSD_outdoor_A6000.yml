@@ -1,0 +1,65 @@
+# general settings for RealDN training
+name: MambaIR_SFIMLLIE_SDSD_outdoor_A6000-960
+model_type: ImageCleanModel
+scale: 1
+num_gpu: 1  # set num_gpu: 0 for cpu mode
+manual_seed: 100
+
+# dataset and data loader settings
+
+datasets:
+  test:
+    name: TestSet
+    type: Dataset_SDSDImage
+    dataroot_gt:  /data/lgl/datasets/sdsd_outdoor_static/outdoor_static_np/GT
+    dataroot_lq:  /data/lgl/datasets/sdsd_outdoor_static/outdoor_static_np/input
+    cache_data: true
+    N_frames: 5
+    padding: new_info
+    train_size: [960, 512]
+    testing_dir: MVI_0898,MVI_0928,MVI_0906,MVI_0975,MVI_1001,MVI_0997,MVI_1003,MVI_1026,MVI_1030,MVI_1032
+
+    io_backend:
+      type: disk
+
+# network structures
+network_g:
+  type: SFIMLLIE
+  img_size: 128
+  patch_size: 1
+  ssm_ratio: 2.0
+  scan_len: 4
+  inp_channels: 3
+  out_channels: 3
+  dim: 48
+  num_blocks: [2, 4, 4, 6]
+  num_refinement_blocks: 2
+  mlp_ratio: 1.5
+  bias: False
+  dual_pixel_task: False
+
+
+# path
+path:
+  pretrain_network_g: /data/lgl/codes/LowlightMOEMaIR/realDenoising/experiments/MambaIR_SFIMLLIE_SDSD_outdoor_A6000/models/net_g_latest.pth
+  strict_load_g: true
+  resume_state: ~
+
+# validation settings
+val:
+  window_size: 8
+  val_freq: !!float 4e3
+  save_img: true
+  rgb2bgr: true
+  use_image: false
+  max_minibatch: 8
+
+  metrics:
+    psnr: # metric name, can be arbitrary
+      type: calculate_psnr
+      crop_border: 0
+      test_y_channel: false
+    ssim:
+      type: calculate_ssim
+      crop_border: 3
+      test_y_channel: false
